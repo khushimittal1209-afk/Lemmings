@@ -1,0 +1,15 @@
+# Simulation outputs
+sim/*
+!sim/.gitkeep
+
+*.vcd
+*.vvp
+*.out
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
