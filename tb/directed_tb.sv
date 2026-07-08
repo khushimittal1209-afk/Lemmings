@@ -60,6 +60,44 @@ module directed_tb;
             end
         end
     endtask
+    //==================================================
+// Stimulus Tasks
+//==================================================
+
+// Reset DUT
+task reset_dut;
+begin
+    areset     = 1;
+    bump_left  = 0;
+    bump_right = 0;
+    ground     = 1;
+    dig        = 0;
+
+    #20;
+    areset = 0;
+    #10;
+end
+endtask
+
+// Hit left wall
+task hit_left_wall;
+begin
+    bump_left = 1;
+    #10;
+    bump_left = 0;
+    #10;
+end
+endtask
+
+// Hit right wall
+task hit_right_wall;
+begin
+    bump_right = 1;
+    #10;
+    bump_right = 0;
+    #10;
+end
+endtask
     initial begin
         tests_run    = 0;
         tests_passed = 0;
@@ -67,20 +105,32 @@ module directed_tb;
         $display("---------------------------");
         $display("Running Reset Test");
         $display("---------------------------");
-        areset = 1;
-        bump_left = 0;
-        bump_right = 0;
-        ground = 1;
-        dig = 0;
-        #20;
-        areset = 0;
-        #10;
+        reset_dut();
         check(
             walk_left &&
             !walk_right &&
             !aaah &&
             !digging,
             "Reset Test");
+            //--------------------------------------------------
+// Test 2 : Left Wall Collision
+//--------------------------------------------------
+
+$display("---------------------------");
+$display("Running Left Wall Test");
+$display("---------------------------");
+
+reset_dut();
+
+hit_left_wall();
+
+check(
+    walk_right &&
+    !walk_left &&
+    !aaah &&
+    !digging,
+    "Left Wall Test"
+);
         $display("\n====================================");
         $display("Verification Summary");
         $display("====================================");
