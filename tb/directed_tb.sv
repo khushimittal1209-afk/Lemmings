@@ -175,6 +175,19 @@ begin
     #10;
 end
 endtask
+//--------------------------------------------------
+// Apply Random Inputs
+//--------------------------------------------------
+task random_inputs;
+begin
+    bump_left  = $random;
+    bump_right = $random;
+    ground     = $random;
+    dig        = $random;
+
+    #10;
+end
+endtask
     initial begin
         tests_run    = 0;
         tests_passed = 0;
@@ -261,13 +274,6 @@ $display("---------------------------");
 reset_dut();
 
 fatal_fall(20);
-
-$display("state      = %0d", dut.state);
-$display("count      = %0d", dut.count);
-$display("walk_left  = %b", walk_left);
-$display("walk_right = %b", walk_right);
-$display("aaah       = %b", aaah);
-$display("digging    = %b", digging);
 
 check(
     !walk_left &&
@@ -360,6 +366,45 @@ check(
     !digging,
     "Permanent SPLAT Test"
 );
+//--------------------------------------------------
+// Test 10 : Random Stress Test
+//--------------------------------------------------
+
+$display("---------------------------");
+$display("Running Random Stress Test");
+$display("---------------------------");
+
+reset_dut();
+
+repeat (1000) begin
+
+    random_inputs();
+
+    // Cannot walk in both directions
+check(
+    !(walk_left && walk_right),
+    "Random: Walk Left & Walk Right"
+);
+
+// Cannot walk and dig simultaneously
+check(
+    !((walk_left || walk_right) && digging),
+    "Random: Walking & Digging"
+);
+
+// Cannot walk while falling
+check(
+    !((walk_left || walk_right) && aaah),
+    "Random: Walking & Falling"
+);
+
+// Cannot dig while falling
+check(
+    !(digging && aaah),
+    "Random: Digging & Falling"
+);
+
+end
         $display("\n====================================");
         $display("Verification Summary");
         $display("====================================");
