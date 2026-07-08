@@ -16,15 +16,15 @@ module lemmings_fsm(
         begin
             if(areset)
                 begin
-                state=LEFT;
+                state <= LEFT;
                 end
             else 
                 begin
                 state<=next_state;
                     if((state==FALL_LEFT)|(state==FALL_RIGHT))
-                        count=count+1;
+                        count <= count + 1;
                     else
-                        count=0;
+                        count <= 0;
                 end
         end
     always @(*)
@@ -42,22 +42,14 @@ module lemmings_fsm(
                     else if(bump_right) next_state= LEFT;
                     else next_state=RIGHT;
                 end
-                FALL_LEFT:begin
-                    
-                    if(ground & (count<20)) begin
-                        next_state= LEFT;
-                        
+                FALL_LEFT: begin
+                    if(ground & (count < 19)) next_state = LEFT;
+                    else if(ground & (count >= 19)) next_state = SPLAT;
+                    else next_state = FALL_LEFT;
                     end
-                    else if(ground & ~(count<20)) next_state=SPLAT;
-                    else next_state=FALL_LEFT;
-                end
                 FALL_RIGHT:begin
-                    
-                    if(ground & (count<20)) begin
-                        next_state= RIGHT;
-                        
-                    end
-                    else if(ground & ~(count<20)) next_state=SPLAT;
+                    if(ground & (count < 19)) next_state= RIGHT;   
+                    else if(ground & (count >= 19)) next_state=SPLAT;
                     else next_state=FALL_RIGHT;
                 end
                 DIG_LEFT:begin
@@ -68,10 +60,7 @@ module lemmings_fsm(
                     if(!ground) next_state= FALL_RIGHT;
                     else next_state=DIG_RIGHT;
                 end
-                SPLAT: begin
-                    next_state=SPLAT;
-                    
-                end
+                SPLAT: next_state=SPLAT;
             endcase
         end
     assign walk_left=(state==LEFT);

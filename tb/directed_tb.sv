@@ -98,6 +98,44 @@ begin
     #10;
 end
 endtask
+//--------------------------------------------------
+// Safe Fall (<20 cycles)
+//--------------------------------------------------
+task safe_fall;
+    input integer cycles;
+    integer i;
+begin
+
+    ground = 0;
+
+    for(i=0; i<cycles; i=i+1)
+        #10;
+
+    ground = 1;
+
+    #10;
+
+end
+endtask
+//--------------------------------------------------
+// Fatal Fall (>=20 cycles)
+//--------------------------------------------------
+task fatal_fall;
+    input integer cycles;
+    integer i;
+begin
+
+    ground = 0;
+
+    for(i=0; i<cycles; i=i+1)
+        #10;
+
+    ground = 1;
+
+    #10;
+
+end
+endtask
     initial begin
         tests_run    = 0;
         tests_passed = 0;
@@ -130,6 +168,74 @@ check(
     !aaah &&
     !digging,
     "Left Wall Test"
+);
+//--------------------------------------------------
+// Test 3 : Right Wall Collision
+//--------------------------------------------------
+
+$display("---------------------------");
+$display("Running Right Wall Test");
+$display("---------------------------");
+
+reset_dut();
+
+// First make the lemming walk right
+hit_left_wall();
+
+// Now hit the right wall
+hit_right_wall();
+
+check(
+    walk_left &&
+    !walk_right &&
+    !aaah &&
+    !digging,
+    "Right Wall Test"
+);
+//--------------------------------------------------
+// Test 4 : Safe Fall
+//--------------------------------------------------
+
+$display("---------------------------");
+$display("Running Safe Fall Test");
+$display("---------------------------");
+
+reset_dut();
+
+safe_fall(19);
+
+check(
+    walk_left &&
+    !walk_right &&
+    !aaah &&
+    !digging,
+    "Safe Fall Test"
+);
+//--------------------------------------------------
+// Test 5 : Fatal Fall
+//--------------------------------------------------
+
+$display("---------------------------");
+$display("Running Fatal Fall Test");
+$display("---------------------------");
+
+reset_dut();
+
+fatal_fall(20);
+
+$display("state      = %0d", dut.state);
+$display("count      = %0d", dut.count);
+$display("walk_left  = %b", walk_left);
+$display("walk_right = %b", walk_right);
+$display("aaah       = %b", aaah);
+$display("digging    = %b", digging);
+
+check(
+    !walk_left &&
+    !walk_right &&
+    !aaah &&
+    !digging,
+    "Fatal Fall Test"
 );
         $display("\n====================================");
         $display("Verification Summary");
