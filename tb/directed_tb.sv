@@ -136,6 +136,45 @@ begin
 
 end
 endtask
+//--------------------------------------------------
+// Dig Left
+//--------------------------------------------------
+task dig_left;
+begin
+    dig = 1;
+    #10;
+    dig = 0;
+    #10;
+end
+endtask
+
+//--------------------------------------------------
+// Dig Right
+//--------------------------------------------------
+task dig_right;
+begin
+    hit_left_wall();   // Move to RIGHT
+    dig = 1;
+    #10;
+    dig = 0;
+    #10;
+end
+endtask
+//--------------------------------------------------
+// Dig Left -> Fall
+//--------------------------------------------------
+task dig_to_fall_left;
+begin
+    dig = 1;
+    #10;
+    dig = 0;
+
+    // Ground disappears
+    ground = 0;
+
+    #10;
+end
+endtask
     initial begin
         tests_run    = 0;
         tests_passed = 0;
@@ -236,6 +275,90 @@ check(
     !aaah &&
     !digging,
     "Fatal Fall Test"
+);
+//--------------------------------------------------
+// Test 6 : Dig Left
+//--------------------------------------------------
+
+$display("---------------------------");
+$display("Running Dig Left Test");
+$display("---------------------------");
+
+reset_dut();
+
+dig_left();
+
+check(
+    digging &&
+    !walk_left &&
+    !walk_right &&
+    !aaah,
+    "Dig Left Test"
+);
+//--------------------------------------------------
+// Test 7 : Dig Right
+//--------------------------------------------------
+
+$display("---------------------------");
+$display("Running Dig Right Test");
+$display("---------------------------");
+
+reset_dut();
+
+dig_right();
+
+check(
+    digging &&
+    !walk_left &&
+    !walk_right &&
+    !aaah,
+    "Dig Right Test"
+);
+//--------------------------------------------------
+// Test 8 : Dig -> Fall
+//--------------------------------------------------
+
+$display("---------------------------");
+$display("Running Dig To Fall Test");
+$display("---------------------------");
+
+reset_dut();
+
+dig_to_fall_left();
+
+check(
+    aaah &&
+    !walk_left &&
+    !walk_right &&
+    !digging,
+    "Dig To Fall Test"
+);
+//--------------------------------------------------
+// Test 9 : Permanent SPLAT
+//--------------------------------------------------
+
+$display("---------------------------");
+$display("Running Permanent SPLAT Test");
+$display("---------------------------");
+
+reset_dut();
+
+fatal_fall(20);
+
+// Try to change everything
+ground = 1;
+dig = 1;
+bump_left = 1;
+bump_right = 1;
+
+#20;
+
+check(
+    !walk_left &&
+    !walk_right &&
+    !aaah &&
+    !digging,
+    "Permanent SPLAT Test"
 );
         $display("\n====================================");
         $display("Verification Summary");
